@@ -16,7 +16,7 @@ const DemoSection = () => {
     setChatLog(prev => [...prev, `Message sent to model...`, `Generation started...`]);
     
     setTimeout(() => {
-      setChatLog(prev => [...prev, `Video generated successfully! Duration: 5s`]);
+      setChatLog(prev => [...prev, `Video generated successfully! Duration: 17s\nTo see the result you need to download the app.`]);
       setIsGenerating(false);
       setPrompt('');
     }, 5000);
@@ -55,7 +55,12 @@ const DemoSection = () => {
               <div className="space-y-3">
                 {chatLog.map((message, index) => (
                   <div key={index} className="text-white/80 font-inter font-light p-3 bg-white/5 rounded-lg">
-                    {message}
+                    {message.split('\n').map((line, lineIndex) => (
+                      <div key={lineIndex}>
+                        {line}
+                        {lineIndex < message.split('\n').length - 1 && <br />}
+                      </div>
+                    ))}
                     {isGenerating && index === chatLog.length - 1 && (
                       <div className="flex items-center space-x-1 mt-2">
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
