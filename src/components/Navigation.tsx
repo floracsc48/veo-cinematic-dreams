@@ -29,7 +29,9 @@ const Navigation = () => {
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <button onClick={() => scrollToSection('hero')} className="transition-colors font-inter font-light text-base text-slate-50">Get Early Access</button>
+              <button onClick={() => scrollToSection('hero')} className="text-white/70 hover:text-white transition-colors font-inter font-light">
+                Hero
+              </button>
               <button onClick={() => scrollToSection('demo')} className="text-white/70 hover:text-white transition-colors font-inter font-light">
                 Demo
               </button>
