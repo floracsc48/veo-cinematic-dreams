@@ -39,9 +39,7 @@ const Navigation = () => {
               <button onClick={() => scrollToSection('faq')} className="text-white/70 hover:text-white transition-colors font-inter font-light">
                 FAQ
               </button>
-              <button onClick={() => scrollToSection('download')} className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-2 rounded-2xl hover:bg-white/20 transition-all duration-300 font-inter font-light">
-                Download
-              </button>
+              
             </div>
 
             {/* Mobile Menu Button */}
