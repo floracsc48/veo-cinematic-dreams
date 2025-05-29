@@ -1,10 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useConfig } from '@/hooks/useConfig';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
+  const [error, setError] = useState('');
+
+  const { validateInviteCode } = useConfig();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,12 +21,55 @@ const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Sync with global access state
+  useEffect(() => {
+    const checkAccessState = () => {
+      const accessState = localStorage.getItem('veo3_access');
+      setHasAccess(accessState === 'true');
+    };
+    
+    checkAccessState();
+    window.addEventListener('storage', checkAccessState);
+    
+    return () => window.removeEventListener('storage', checkAccessState);
+  }, []);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       setIsOpen(false);
     }
+  };
+
+  const handleGetAccess = () => {
+    setShowModal(true);
+    setError('');
+    setInviteCode('');
+  };
+
+  const handleSubmitCode = () => {
+    if (!inviteCode.trim()) {
+      setError('Please enter an invite code.');
+      return;
+    }
+
+    const codeConfig = validateInviteCode(inviteCode);
+    if (codeConfig !== null) {
+      setHasAccess(true);
+      localStorage.setItem('veo3_access', 'true');
+      localStorage.setItem('veo3_invite_code', inviteCode);
+      setShowModal(false);
+      setError('');
+      // Trigger storage event for other components
+      window.dispatchEvent(new Event('storage'));
+    } else {
+      setError('Invalid access code. Please try again.');
+    }
+  };
+
+  const handleDownloadClick = () => {
+    scrollToSection('download');
   };
 
   return (
@@ -59,12 +109,21 @@ const Navigation = () => {
               >
                 FAQ
               </button>
-              <button 
-                onClick={() => scrollToSection('download')}
-                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-2 rounded-2xl hover:bg-white/20 transition-all duration-300 font-inter font-light"
-              >
-                Download
-              </button>
+              {!hasAccess ? (
+                <button 
+                  onClick={handleGetAccess}
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-2 rounded-2xl hover:bg-white/20 transition-all duration-300 font-inter font-light"
+                >
+                  Get Early Access
+                </button>
+              ) : (
+                <button 
+                  onClick={handleDownloadClick}
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-2 rounded-2xl hover:bg-white/20 transition-all duration-300 font-inter font-light"
+                >
+                  Download
+                </button>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -108,11 +167,60 @@ const Navigation = () => {
               >
                 FAQ
               </button>
+              {!hasAccess ? (
+                <button 
+                  onClick={handleGetAccess}
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-3 rounded-2xl hover:bg-white/20 transition-all duration-300 font-inter font-light mt-4"
+                >
+                  Get Early Access
+                </button>
+              ) : (
+                <button 
+                  onClick={handleDownloadClick}
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-3 rounded-2xl hover:bg-white/20 transition-all duration-300 font-inter font-light mt-4"
+                >
+                  Download
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Code Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-black/90 backdrop-blur-lg border border-white/10 rounded-2xl p-8 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-inter font-semibold text-white">Enter Invite Code</h3>
               <button 
-                onClick={() => scrollToSection('download')}
-                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-3 rounded-2xl hover:bg-white/20 transition-all duration-300 font-inter font-light mt-4"
+                onClick={() => setShowModal(false)}
+                className="text-white/60 hover:text-white transition-colors"
               >
-                Download
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                placeholder="Enter your invite code..."
+                className="w-full bg-white/5 border border-white/20 text-white placeholder-white/40 rounded-lg px-4 py-3 font-inter font-light focus:border-blue-500 focus:outline-none"
+                onKeyPress={(e) => e.key === 'Enter' && handleSubmitCode()}
+              />
+              
+              {error && (
+                <p className="text-red-400 text-sm font-inter font-light">{error}</p>
+              )}
+              
+              <button
+                onClick={handleSubmitCode}
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg font-inter font-medium transition-colors"
+              >
+                Verify Code
               </button>
             </div>
           </div>
