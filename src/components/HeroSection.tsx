@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useConfig } from '@/hooks/useConfig';
 
@@ -12,21 +12,6 @@ const HeroSection = () => {
   const [validatedCode, setValidatedCode] = useState<string | null>(null);
 
   const { validateInviteCode, getDownloadLink, getPassword } = useConfig();
-
-  // Sync with global access state
-  useEffect(() => {
-    const checkAccessState = () => {
-      const accessState = localStorage.getItem('veo3_access');
-      const savedCode = localStorage.getItem('veo3_invite_code');
-      setHasAccess(accessState === 'true');
-      setValidatedCode(savedCode);
-    };
-    
-    checkAccessState();
-    window.addEventListener('storage', checkAccessState);
-    
-    return () => window.removeEventListener('storage', checkAccessState);
-  }, []);
 
   const handleGetAccess = () => {
     setShowModal(true);
@@ -44,12 +29,8 @@ const HeroSection = () => {
     if (codeConfig !== null) {
       setHasAccess(true);
       setValidatedCode(inviteCode);
-      localStorage.setItem('veo3_access', 'true');
-      localStorage.setItem('veo3_invite_code', inviteCode);
       setShowModal(false);
       setError('');
-      // Trigger storage event for other components
-      window.dispatchEvent(new Event('storage'));
     } else {
       setError('Invalid access code. Please try again.');
     }
@@ -72,13 +53,6 @@ const HeroSection = () => {
     const downloadLink = getDownloadLink(validatedCode || undefined);
     if (downloadLink) {
       window.open(downloadLink, '_blank');
-    }
-  };
-
-  const scrollToDownload = () => {
-    const element = document.getElementById('download');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -123,11 +97,11 @@ const HeroSection = () => {
             </button>
           ) : (
             <button 
-              onClick={scrollToDownload}
+              onClick={handleDownload}
               className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-8 py-4 rounded-2xl font-inter font-medium text-lg transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/50 animate-glow"
             >
               <span className="group-hover:scale-105 transition-transform inline-block">
-                Download
+                Download Veo 3 App
               </span>
             </button>
           )}
