@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronDown, Settings, Send } from 'lucide-react';
+import { ChevronDown, Settings, Send, Lock } from 'lucide-react';
 
 const DemoSection = () => {
   const [prompt, setPrompt] = useState('');
@@ -8,6 +8,15 @@ const DemoSection = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [selectedModel, setSelectedModel] = useState('Text to Video');
   const [chatLog, setChatLog] = useState<string[]>([]);
+  const [showTooltip, setShowTooltip] = useState<string | null>(null);
+
+  const getCurrentDate = () => {
+    const now = new Date();
+    const month = now.toLocaleDateString('en-US', { month: 'short' });
+    const day = now.getDate();
+    const year = now.getFullYear();
+    return `${month} ${day} - ${year}`;
+  };
 
   const handleGenerate = () => {
     if (!prompt.trim()) return;
@@ -21,6 +30,12 @@ const DemoSection = () => {
       setPrompt('');
     }, 5000);
   };
+
+  const modelOptions = [
+    { value: 'Text to Video', locked: false },
+    { value: 'Frames to Video', locked: true },
+    { value: 'Ingredients to Video', locked: true }
+  ];
 
   return (
     <section id="demo" className="py-20 bg-black relative">
@@ -39,7 +54,7 @@ const DemoSection = () => {
           {/* Top Navigation */}
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
             <div className="text-white/60 font-inter font-light text-sm">
-              Flow &gt; May 29 - 1205 &gt; Scenebuilder
+              Google-Veo3 &gt; {getCurrentDate()} &gt; Scenebuilder
             </div>
           </div>
 
@@ -82,13 +97,31 @@ const DemoSection = () => {
                 <select 
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2 font-inter font-light appearance-none pr-8"
+                  className="bg-gray-800 border border-white/20 text-gray-200 rounded-lg px-4 py-2 font-inter font-light appearance-none pr-8 focus:border-blue-500 focus:outline-none"
                 >
-                  <option value="Text to Video">Text to Video</option>
-                  <option value="Frames to Video">Frames to Video</option>
-                  <option value="Ingredients to Video">Ingredients to Video</option>
+                  {modelOptions.map((option) => (
+                    <option 
+                      key={option.value} 
+                      value={option.value}
+                      className="bg-gray-800 text-gray-200"
+                      disabled={option.locked}
+                    >
+                      {option.value} {option.locked ? '🔒' : ''}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white/60" size={16} />
+                
+                {/* Tooltip for locked features */}
+                {(selectedModel === 'Frames to Video' || selectedModel === 'Ingredients to Video') && (
+                  <div 
+                    className="absolute top-full left-0 mt-2 bg-black/90 text-white text-xs px-2 py-1 rounded border border-white/20 whitespace-nowrap z-10"
+                    onMouseEnter={() => setShowTooltip(selectedModel)}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    This feature is only available in the Veo 3 App.
+                  </div>
+                )}
               </div>
               
               <button 
